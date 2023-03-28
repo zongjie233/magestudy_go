@@ -11,4 +11,9 @@ func demo() {
 	fmt.Println(subslice1)
 	fmt.Println(subslice2)
 	fmt.Println(subslice3)
+	slice[2] = -1
+	fmt.Println(subslice1)
+	fmt.Println(subslice2)
+	fmt.Println(subslice3)
+	// 子切片共享同一个内存，切片引起扩容的时候会产生副本
 }
