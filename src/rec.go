@@ -36,10 +36,10 @@ func (rec *Recommender) Rec() []*common.Product {
 
 	// 对召回结果进行排序
 	begin := time.Now()
-	SortedResult := rec.Sorter.Sort(RecallSlice)
-	log.Printf("排序耗时%dns\n", time.Since(begin).Nanoseconds())
-	println(time.Since(begin).Nanoseconds())
 
+	SortedResult := rec.Sorter.Sort(RecallSlice)
+	log.Printf("排序耗时%vns\n", time.Since(begin).Nanoseconds())
+	log.Printf("排序耗时%vns\n", time.Since(begin).Nanoseconds())
 	// 顺序选择多个过滤规则
 	FilteredResult := SortedResult
 	prevCount := len(FilteredResult)
@@ -66,7 +66,7 @@ func main() {
 	result := recer.Rec()
 
 	for i, p := range result {
-		fmt.Printf("第%d名：%d %s\n", i, p.Id, p.Name)
+		fmt.Printf("第%d名：%d %s\n", i+1, p.Id, p.Name)
 	}
 
 }

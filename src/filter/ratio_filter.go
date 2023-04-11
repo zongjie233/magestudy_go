@@ -13,7 +13,7 @@ func (r RatioFilter) Name() string {
 func (r RatioFilter) Filter(products []*common.Product) []*common.Product {
 	rect := make([]*common.Product, 0, len(products))
 	for _, product := range products {
-		if product.RatioCount > 10 && product.PositiveRatio > 0.8 {
+		if product.RatioCount >= 0 && product.PositiveRatio >= 0 {
 			rect = append(rect, product)
 		}
 	}
