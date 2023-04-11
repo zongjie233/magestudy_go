@@ -3,6 +3,7 @@ package main
 import (
 	"common"
 	"filter"
+	"fmt"
 	"log"
 	"recall"
 	"sortt"
@@ -12,7 +13,7 @@ import (
 type Recommender struct {
 	Recallers []recall.Recaller
 	Sorter    sortt.Sorter
-	Filter    []filter.Filter
+	Filters   []filter.Filter
 }
 
 func (rec *Recommender) Rec() []*common.Product {
@@ -37,7 +38,35 @@ func (rec *Recommender) Rec() []*common.Product {
 	begin := time.Now()
 	SortedResult := rec.Sorter.Sort(RecallSlice)
 	log.Printf("排序耗时%dns\n", time.Since(begin).Nanoseconds())
+	println(time.Since(begin).Nanoseconds())
 
 	// 顺序选择多个过滤规则
+	FilteredResult := SortedResult
+	prevCount := len(FilteredResult)
+	for _, filter := range rec.Filters {
+		begin := time.Now()
+		FilteredResult = filter.Filter(FilteredResult)
+		log.Printf("过滤规则%s耗时%dns,过滤掉了%d个商品", filter.Name(), time.Since(begin).Nanoseconds(), prevCount-len(FilteredResult))
+		prevCount = len(FilteredResult)
+	}
+
+	return FilteredResult
+}
+func main() {
+	recer := Recommender{
+		Recallers: []recall.Recaller{
+			recall.HotRecall{Tag: "hot"},
+			recall.SizeRecall{Tag: "size"},
+		},
+		Sorter: sortt.RationSorter{Tag: "ratio"},
+		Filters: []filter.Filter{
+			filter.RatioFilter{Tag: "ratio"},
+		},
+	}
+	result := recer.Rec()
+
+	for i, p := range result {
+		fmt.Printf("第%d名：%d %s\n", i, p.Id, p.Name)
+	}
 
 }
