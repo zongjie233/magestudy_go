@@ -35,6 +35,9 @@ func get_field() {
 		fmt.Println(nameField.IsExported())
 	}
 
+	// 获取user中嵌套的Car结构体其中成员变量
+	speedField := typeUser.FieldByIndex([]int{3, 0})
+	fmt.Println(speedField.Name, speedField.IsExported())
 }
 
 func memoly_aligh() {
@@ -52,9 +55,61 @@ func memoly_aligh() {
 
 }
 
+func getMethod() {
+	typeUser := reflect.TypeOf(Bird{})
+	methodNum := typeUser.NumMethod()
+	for i := 0; i < methodNum; i++ {
+		method := typeUser.Method(i) // 只能获取可导出的方法
+		fmt.Printf("name:%s type:%s isEx %v\n", method.Name, method.Type, method.IsExported())
+	}
+}
+
+func getStructrelation() {
+	plan := Plane{}
+	bird := Bird{}
+	frog := Frog{}
+	planeType := reflect.TypeOf(plan)
+	birdType := reflect.TypeOf(bird)
+	fmt.Println(planeType)
+	fmt.Println(birdType)
+	frogType := reflect.TypeOf(frog).Elem()
+	// 查看结构体是否实现指定接口
+	fmt.Println(frogType.Implements(frogType))
+
+}
+
+func valueOtherconversion() {
+	iValue := reflect.ValueOf(1)
+	sValue := reflect.ValueOf("hello")
+	userValue := reflect.ValueOf(&User{
+		Name: "hs",
+		Sex:  1,
+		Age:  19,
+	})
+	fmt.Println(iValue)
+	fmt.Println(sValue)
+	fmt.Println(userValue)
+
+	iType := iValue.Type()
+	sType := sValue.Type()
+	userType := userValue.Type()
+
+	fmt.Println(iValue.Kind() == iType.Kind(), iValue.Kind() == reflect.Int)
+	fmt.Println(sValue.Kind() == sType.Kind(), sValue.Kind() == reflect.String)
+	fmt.Println(userValue.Kind() == userType.Kind(), userValue.Kind() == reflect.Ptr)
+
+	userValue2 := userValue.Elem() // 与Addr是互逆操作，Elem是在解析指针
+	fmt.Println(userValue2.Kind() == reflect.Struct)
+	userValue3 := userValue2.Addr()
+	fmt.Println(userValue3.Kind() == reflect.Ptr)
+}
+
 func main() {
 	//get_field()
-	memoly_aligh()
+	//memoly_aligh()
+	//getMethod()
+	//getStructrelation()
+	valueOtherconversion()
 }
 
 /*

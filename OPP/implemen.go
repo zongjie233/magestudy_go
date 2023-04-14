@@ -20,6 +20,19 @@ type Bird struct {
 	Car
 }
 
-func (Bird) fly() int {
+func (b Bird) Fly() int {
 	return 1000
+}
+
+type Fish interface {
+	Swing()
+	Breath()
+}
+
+type Frog struct {
+	Name string
+}
+
+func (f Frog) Swing() {
+
 }
