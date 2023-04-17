@@ -104,12 +104,109 @@ func valueOtherconversion() {
 	fmt.Println(userValue3.Kind() == reflect.Ptr)
 }
 
+func valueIsempty() {
+	var ifc interface{}
+	v := reflect.ValueOf(ifc)
+	fmt.Printf("v持有真实的值 %t\n", v.IsValid())
+	ifc = 8
+	v = reflect.ValueOf(ifc)
+	fmt.Printf("v持有真实的值 %t\n", v.IsValid())
+
+	var user *User = nil
+	v = reflect.ValueOf(user)
+	if v.IsValid() {
+		fmt.Printf("v持有值为nil %t\n", v.IsNil()) // 调用IsNil之前，必须保证isValid()true，否则panic
+	} else {
+		fmt.Printf("v没有持有值\n")
+	}
+}
+
+// 可寻址
+func addressable() {
+	v1 := reflect.ValueOf(1)
+	var x int
+	v2 := reflect.ValueOf(x)
+	v3 := reflect.ValueOf(&x)
+	v4 := v3.Elem()
+	fmt.Printf("v1 is addressable %t\n", v1.CanAddr())
+	fmt.Printf("v2 is addressable %t\n", v2.CanAddr())
+	fmt.Printf("v3 is addressable %t\n", v3.CanAddr())
+	fmt.Printf("v4 is addressable %t\n", v4.CanAddr())
+}
+
+func changeValue() {
+	// 通过反射修改Int
+	var i int = 10
+	fmt.Printf("address of i is %p \n", &i)
+	iValue := reflect.ValueOf(&i)
+	if iValue.CanAddr() {
+		iValue.SetInt(8)
+		fmt.Printf("1: i=%d\n", i)
+	}
+	iValue2 := iValue.Elem()
+	if iValue2.CanAddr() {
+		iValue2.SetInt(8)
+		fmt.Printf("2: i=%d %p\n", i, &i)
+	}
+
+	// 通过反射修改String
+	var s string = "hello"
+	fmt.Printf("address of i is %p \n", &s)
+	sValue := reflect.ValueOf(&s)
+	if sValue.CanAddr() {
+		sValue.SetString("world")
+		fmt.Printf("3: s=%s\n", s)
+	}
+	sValue2 := sValue.Elem()
+	if sValue2.CanAddr() {
+		sValue2.SetString("world")
+		fmt.Printf("4: s=%s %p\n", s, &s)
+	}
+
+	// 通过反射修改struct
+	user := User{
+		Name: "Zdq",
+		Age:  18,
+	}
+
+	userValue := reflect.ValueOf(&user) // 必须传入&user，才为可寻址
+	userValue.Elem().FieldByName("Age").SetInt(19)
+	fmt.Println(user.Age)
+
+}
+
+// 修改切片数据
+func changeSlice() {
+	users := make([]*User, 3, 5)
+	users[0] = &User{
+		Name: "hs",
+		Age:  18,
+	}
+	sliceValue := reflect.ValueOf(users)
+	if sliceValue.Len() > 0 {
+		sliceValue.Index(0).Elem().FieldByName("Age").SetInt(20)
+		fmt.Println(users[0].Age)
+	}
+
+	// 切片整组元素替换
+	sliceValue.Index(1).Set(reflect.ValueOf(&User{
+		Name: "aaa",
+		Age:  21,
+	}))
+	fmt.Println(users[1].Age)
+
+}
+
 func main() {
 	//get_field()
 	//memoly_aligh()
 	//getMethod()
 	//getStructrelation()
-	valueOtherconversion()
+	//valueOtherconversion()
+	//valueIsempty()
+	//addressable()
+	//changeValue()
+	changeSlice()
 }
 
 /*
