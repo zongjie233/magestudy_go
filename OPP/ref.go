@@ -197,6 +197,42 @@ func changeSlice() {
 
 }
 
+func changeMap() {
+	u1 := &User{
+		Name: "aaa",
+		Age:  15,
+	}
+	u2 := &User{
+		Name: "bbb",
+		Age:  16,
+	}
+	userMap := make(map[int]*User, 5)
+	userMap[1] = u1
+	mapValue := reflect.ValueOf(userMap)
+	mapType := reflect.TypeOf(userMap)
+	keyType := mapType.Key()
+	valueType := mapType.Elem() // 获得map中value的type
+	fmt.Printf("type of key %v, type of value %v\n", keyType, valueType)
+
+	// 添加map中的一对k-v
+	mapValue.SetMapIndex(reflect.ValueOf(2), reflect.ValueOf(u2))
+
+	// 修改map中的一对k-v
+	mapValue.MapIndex(reflect.ValueOf(1)).
+		Elem().
+		FieldByName("Age").
+		SetInt(21)
+	for _, v := range userMap {
+		fmt.Printf("%s  %d\n", v.Name, v.Age)
+	}
+
+}
+
+//func callFunction() {
+//	valueFunc := reflect.ValueOf(Add)
+//	typeFunc := valueFunc.Type()
+//}
+
 func main() {
 	//get_field()
 	//memoly_aligh()
@@ -206,7 +242,8 @@ func main() {
 	//valueIsempty()
 	//addressable()
 	//changeValue()
-	changeSlice()
+	//changeSlice()
+	changeMap()
 }
 
 /*
