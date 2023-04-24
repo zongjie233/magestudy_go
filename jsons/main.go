@@ -62,7 +62,7 @@ func Marshal(v interface{}) ([]byte, error) {
 }
 
 // 反序列化
-func unMarshal(v interface{}, data []byte) error {
+func UnMarshal(v interface{}, data []byte) error {
 	value := reflect.ValueOf(v)
 	typ := value.Type() // 等价于 typ := reflect.TypeOf(v)
 	if typ.Kind() != reflect.Ptr {
@@ -101,7 +101,7 @@ func unMarshal(v interface{}, data []byte) error {
 		value.SetString(s)
 	case reflect.Struct:
 		if s[0] == '{' && s[len(s)-1] == '}' {
-			arr := strings.Split(s[1:len(s)-1], "s")
+			arr := strings.Split(s[1:len(s)-1], ",")
 			if len(arr) > 0 {
 				fieldCount := typ.NumField()
 				tag2Fidle := make(map[string]string, fieldCount)
@@ -116,6 +116,29 @@ func unMarshal(v interface{}, data []byte) error {
 				for _, ele := range arr {
 					brr := strings.SplitN(ele, ":", 2) // 声明只要两个部分，出去第一部分，其他均归到第二部分
 					tag := brr[0]
+					if tag[0] == '"' && tag[len(tag)-1] == '"' {
+						tag = tag[1 : len(tag)-1] //gender
+						if fieldName, exists := tag2Fidle[tag]; exists {
+							fieldValue := value.FieldByName(fieldName)
+							fieldType := fieldValue.Type()
+							if fieldValue.Kind() != reflect.Ptr {
+								fieldValue = fieldValue.Addr()
+								if err := UnMarshal(fieldValue.Interface(), []byte(brr[1])); err != nil {
+									return err
+								}
+							} else {
+								newValue := reflect.New(fieldType.Elem()) // 反射中创建一个对象 等价于 user:=new(User)
+								if err := UnMarshal(fieldValue.Interface(), []byte(brr[1])); err != nil {
+									return err
+								} else {
+									//value.FieldByName(fieldName).Set(newValue)
+									fieldValue.Set(newValue)
+								}
+							}
+						} else {
+
+						}
+					}
 				}
 			}
 		} else {
@@ -146,6 +169,12 @@ func main() {
 	}
 	if data, err := Marshal(user); err == nil {
 		fmt.Println(string(data))
+		var u2 User
+		if err := UnMarshal(&u2, data); err == nil { // UnMarshal第一个参数必须接受指针
+			fmt.Println(u2.Name, u2.Age, u2.Sex)
+		} else {
+			fmt.Println(err)
+		}
 	} else {
 		fmt.Println(err)
 	}
